@@ -1,14 +1,28 @@
 ﻿using UnityEngine;
+using System;
 
 namespace MagicWords.Application.EventChannels
 {
     [CreateAssetMenu(menuName = "Events/UI Events Channel")]
     public class UIEventsChannelSO : ScriptableObject
     {
-        // Se llenará más adelante con los eventos relacionados con la UI.
-        public delegate void ConnectionStatusAction();
-        public event ConnectionStatusAction OnConnectionLost;
-        public event ConnectionStatusAction OnConnectionRestored;
-        public event ConnectionStatusAction OnConnectionTimeout;
+        public event Action OnConnectionLost;
+        public event Action OnConnectionRestored;
+        public event Action OnConnectionTimeout;
+
+        public void RaiseConnectionLost()
+        {
+            OnConnectionLost?.Invoke();
+        }
+
+        public void RaiseConnectionRestored()
+        {
+            OnConnectionRestored?.Invoke();
+        }
+
+        public void RaiseConnectionTimeout()
+        {
+            OnConnectionTimeout?.Invoke();
+        }
     }
 }

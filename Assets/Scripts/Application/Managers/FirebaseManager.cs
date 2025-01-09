@@ -82,7 +82,7 @@ namespace MagicWords.Application.Managers
 
             Match match = new Match(matchId, player1Id, gameMode, objective, maxTime, boardSetup);
             matchReference.SetRawJsonValueAsync(JsonUtility.ToJson(match));
-            gameEventsChannel.OnMatchCreated(matchId);
+            // gameEventsChannel.OnMatchCreated(matchId);  //Lo comentamos temporalmente
             // Llamar a una Cloud Function para buscar oponentes (para el modo PvP)
             // ...
         }
@@ -165,24 +165,24 @@ namespace MagicWords.Application.Managers
                         if (latency > 5000) // Ajusta el umbral de latencia según sea necesario.
                         {
                             // Latencia alta detectada.
-                            uiEventsChannel.OnConnectionLost(); // Notifica a la UI sobre la conexión perdida.
+                            uiEventsChannel.RaiseConnectionLost(); // Notifica a la UI sobre la conexión perdida.
                         }
                         else
                         {
                             // Conexión normal.
-                            uiEventsChannel.OnConnectionRestored(); // Notifica a la UI sobre una conexión estable.
+                            uiEventsChannel.RaiseConnectionRestored(); // Notifica a la UI sobre una conexión estable.
                         }
                     }
                     catch (Exception ex)
                     {
                         Debug.LogError("Error al procesar la respuesta de ping: " + ex.Message);
-                        uiEventsChannel.OnConnectionLost(); // Considera la conexión como perdida en caso de error.
+                        uiEventsChannel.RaiseConnectionLost(); // Considera la conexión como perdida en caso de error.
                     }
                 }
                 else
                 {
                     // No se pudo obtener una respuesta del servidor.
-                    uiEventsChannel.OnConnectionLost(); // Notifica a la UI sobre la conexión perdida.
+                    uiEventsChannel.RaiseConnectionLost(); // Notifica a la UI sobre la conexión perdida.
                 }
 
                 // Espera antes de la próxima verificación.
