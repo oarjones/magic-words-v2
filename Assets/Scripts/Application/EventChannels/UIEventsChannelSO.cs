@@ -9,6 +9,9 @@ namespace MagicWords.Application.EventChannels
         public event Action OnConnectionLost;
         public event Action OnConnectionRestored;
         public event Action OnConnectionTimeout;
+        public event Action OnStartMatch;
+
+        
 
         public void RaiseConnectionLost()
         {
@@ -23,6 +26,11 @@ namespace MagicWords.Application.EventChannels
         public void RaiseConnectionTimeout()
         {
             OnConnectionTimeout?.Invoke();
+        }
+
+        public void RaiseStartMatch()
+        {
+            OnStartMatch?.Invoke();
         }
     }
 }
