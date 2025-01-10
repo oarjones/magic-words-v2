@@ -12,10 +12,18 @@ namespace MagicWords.Application.Managers
     public class AlgorithmManager : MonoBehaviour
     {
         [SerializeField] private WordManager wordManager;
+        [SerializeField] private DictionaryService dictionaryService;
+
+        private List<string> currentWord = new List<string>();
+        private List<string> bestWord = new List<string>();
+        private List<Cell> exploredCells = new List<Cell>();
 
         public void GenerateMove(Match match, Board board)
         {
-            // Lógica para generar un movimiento para la IA
+            //Reiniciar las variables para la búsqueda de palabras
+            currentWord.Clear();
+            bestWord.Clear();
+            exploredCells.Clear();
             // 1. Obtener todas las celdas disponibles
             List<Cell> availableCells = GetAllAvailableCells(board);
 
@@ -26,15 +34,19 @@ namespace MagicWords.Application.Managers
                 return;
             }
 
-            // 3. Intentar formar una palabra
-            List<Cell> word = FindWord(availableCells, board, match);
+            // 3. Buscar la mejor palabra en el tablero
+            foreach (Cell cell in availableCells)
+            {
+                CheckCell(cell, board, match);
+            }
 
             // 4. Si se encuentra una palabra, enviarla
-            if (word.Count > 0)
+            if (bestWord.Count > 0)
             {
-                wordManager.ValidateWord(word, match.Player2Id, match);
+                List<Cell> wordCells = bestWord.Select(cellLetter => availableCells.FirstOrDefault(c => c.Letter.ToString() == cellLetter)).ToList();
+                wordManager.ValidateWord(wordCells, match.Player2Id, match);
                 match.ClearPlayerWord(match.Player2Id);
-                Debug.Log("Palabra encontrada por la IA: " + ConvertCellsToString(word));
+                Debug.Log("Palabra encontrada por la IA: " + ConvertCellsToString(wordCells));
                 return;
             }
 
@@ -43,6 +55,45 @@ namespace MagicWords.Application.Managers
             match.AddPlayerWord(match.Player2Id, randomCell);
             Debug.Log("Movimiento aleatorio de la IA: " + randomCell.Letter);
         }
+        private void CheckCell(Cell cell, Board board, Match match)
+        {
+            //Comprueba si la celda ya ha sido explorada
+            if (exploredCells.Contains(cell))
+            {
+                return;
+            }
+
+            //Añadir la letra de la celda actual a la palabra actual
+            currentWord.Add(cell.Letter.ToString());
+            exploredCells.Add(cell);
+
+            //Comprobar si la palabra actual es una palabra válida
+            string currentWordString = string.Join("", currentWord);
+            if (dictionaryService.IsValidWord(currentWordString))
+            {
+                //Si es una palabra válida y es más larga que la mejor palabra encontrada hasta ahora, actualizar la mejor palabra
+                if (currentWord.Count > bestWord.Count)
+                {
+                    bestWord = new List<string>(currentWord);
+                }
+            }
+
+            //Comprobar si la palabra actual es un prefijo válido
+            if (dictionaryService.IsValidPrefix(currentWordString))
+            {
+                // Si es un prefijo válido, seguir buscando en las celdas adyacentes
+                List<Cell> adjacentCells = board.GetAdjacentCells(cell);
+                foreach (Cell adjacentCell in adjacentCells)
+                {
+                    CheckCell(adjacentCell, board, match); // Llamada recursiva
+                }
+            }
+
+            //Retroceder: eliminar la última letra y marcar la celda como no explorada
+            currentWord.RemoveAt(currentWord.Count - 1);
+            exploredCells.Remove(cell);
+        }
+
 
         private List<Cell> GetAllAvailableCells(Board board)
         {
@@ -61,98 +112,9 @@ namespace MagicWords.Application.Managers
             return availableCells;
         }
 
-        private List<Cell> FindWord(List<Cell> availableCells, Board board, Match match)
-        {
-            // Intenta encontrar una palabra válida en el tablero
-            List<Cell> bestWord = new List<Cell>();
-
-            // Todas las permutaciones posibles de las celdas disponibles
-            foreach (var permutation in Permute(availableCells))
-            {
-                List<Cell> currentWord = new List<Cell>();
-                foreach (var cell in permutation)
-                {
-                    if (IsAdjacentToLast(cell, currentWord, board))
-                    {
-                        currentWord.Add(cell);
-                        string wordString = ConvertCellsToString(currentWord);
-                        if (wordManager.ValidateWord(currentWord, match.Player2Id, match))
-                        {
-                            // Si la palabra actual es más larga que la mejor palabra encontrada hasta ahora, actualizar la mejor palabra
-                            if (currentWord.Count > bestWord.Count)
-                            {
-                                bestWord = new List<Cell>(currentWord); // Crear una nueva lista para evitar referencias
-                            }
-                        }
-                    }
-                }
-            }
-            return bestWord;
-        }
-
-        private bool IsAdjacentToLast(Cell cell, List<Cell> currentWord, Board board)
-        {
-            //Comprueba si la celda es adyacente a la última celda de la palabra actual
-            if (currentWord.Count == 0)
-            {
-                return true; // Cualquier celda es válida si la palabra está vacía
-            }
-
-            Cell lastCell = currentWord.Last();
-            return board.GetAdjacentCells(lastCell).Contains(cell);
-        }
-
         private string ConvertCellsToString(List<Cell> cells)
         {
             return new string(cells.Select(c => c.Letter).ToArray());
-        }
-
-        // Método para obtener todas las permutaciones de una lista
-        private IEnumerable<IEnumerable<T>> Permute<T>(IEnumerable<T> sequence)
-        {
-            if (sequence == null)
-            {
-                yield break;
-            }
-
-            var list = sequence.ToList();
-
-            if (!list.Any())
-            {
-                yield return Enumerable.Empty<T>();
-            }
-            else
-            {
-                var startingElementIndex = 0;
-
-                foreach (var startingElement in list)
-                {
-                    var index = startingElementIndex;
-                    var remainingItems = list.Where((e, i) => i != index);
-
-                    foreach (var permutationOfRemainder in Permute(remainingItems))
-                    {
-                        yield return Concat(startingElement, permutationOfRemainder);
-                    }
-
-                    startingElementIndex++;
-                }
-            }
-        }
-
-        // Método auxiliar para concatenar un elemento a una secuencia
-        private IEnumerable<T> Concat<T>(T firstElement, IEnumerable<T> secondSequence)
-        {
-            yield return firstElement;
-            if (secondSequence == null)
-            {
-                yield break;
-            }
-
-            foreach (var item in secondSequence)
-            {
-                yield return item;
-            }
         }
     }
 }
