@@ -14,6 +14,7 @@ namespace MagicWords.Application.Managers
         [SerializeField] private UIEventsChannelSO uiEventsChannel;
         [SerializeField] private GameEventsChannelSO gameEventsChannel;
         [SerializeField] private WordManager wordManager;
+        [SerializeField] private AlgorithmManager algorithmManager;
 
         public GameMode gameMode; //PvP or PvA
         public float maxTime;
@@ -46,7 +47,7 @@ namespace MagicWords.Application.Managers
             }
             else
             {
-                gameService = new LocalGameService(this, gameEventsChannel, wordManager);
+                gameService = new LocalGameService(this, gameEventsChannel, wordManager, algorithmManager);
             }
 
             // Iniciar el juego usando el servicio seleccionado

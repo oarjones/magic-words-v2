@@ -12,14 +12,19 @@ namespace MagicWords.Application.Services
         private GameManager gameManager;
         private GameEventsChannelSO gameEventsChannel;
         private WordManager wordManager;
+        private AlgorithmManager algorithmManager;
         private Match currentMatch;
 
-        public LocalGameService(GameManager gameManager, GameEventsChannelSO gameEventsChannel, WordManager wordManager)
+        public LocalGameService(GameManager gameManager, GameEventsChannelSO gameEventsChannel, WordManager wordManager, AlgorithmManager algorithmManager)
         {
             this.gameManager = gameManager;
             this.gameEventsChannel = gameEventsChannel;
             this.wordManager = wordManager;
+            this.algorithmManager = algorithmManager;
         }
+
+
+
 
         public void StartGame(string player1Id, GameMode gameMode, string objective, float maxTime, string boardSetup)
         {
@@ -27,12 +32,6 @@ namespace MagicWords.Application.Services
             string matchId = Guid.NewGuid().ToString(); // Generar un ID único para la partida
             currentMatch = new Match(matchId, player1Id, gameMode, objective, maxTime, boardSetup);
             gameEventsChannel.RaiseMatchCreated(matchId);
-        }
-
-        public void CreateBoard(string boardSetup)
-        {
-            // Crear el tablero localmente
-            gameManager.HandleMatchStarted(currentMatch.MatchId);
         }
 
         public void HandleCellSelection(Cell cell, string playerId)
@@ -48,6 +47,20 @@ namespace MagicWords.Application.Services
                 {
                     currentMatch.ClearPlayerWord(playerId);
                 }
+            }
+            if (playerId == currentMatch.Player2Id)
+            {
+                // Si el jugador es la IA, generar un movimiento después de que haya seleccionado una celda
+                algorithmManager.GenerateMove(currentMatch, currentMatch.Board);
+            }
+        }
+        public void CreateBoard(string boardSetup)
+        {
+            // Crear el tablero localmente
+            gameManager.HandleMatchStarted(currentMatch.MatchId);
+            if (currentMatch.Mode == GameMode.PvA)
+            {
+                currentMatch.SetPlayer2("AIGamePlayer");
             }
         }
 
