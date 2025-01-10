@@ -6,16 +6,13 @@ using UnityEngine;
 
 namespace MagicWords.Domain.Logic.Services
 {
-    public class DictionaryService
+    [CreateAssetMenu(menuName = "Services/Dictionary Service")]
+    public class DictionaryService : ScriptableObject
     {
+        [SerializeField] private TextAsset dictionaryAsset;
         private Trie trie;
 
-        public DictionaryService(TextAsset dictionaryAsset)
-        {
-            LoadDictionary(dictionaryAsset);
-        }
-
-        private void LoadDictionary(TextAsset dictionaryAsset)
+        public void LoadDictionary()
         {
             trie = new Trie();
             string[] words = dictionaryAsset.text.Split('\n');
