@@ -64,7 +64,7 @@ namespace MagicWords.Application.Managers
                     // Configurar la posición de la celda en la UI
                     // ...
                     // Actualizar el texto de la celda con la letra
-                    cellObject.GetComponentInChildren<TextMeshProUGUI>().text = cell.Letter.ToString();
+                    cellObject.GetComponentInChildren<TextMeshProUGUI>().text = cell.Value.Letter.ToString();
                 }
             }
         }

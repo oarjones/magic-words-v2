@@ -82,7 +82,7 @@ namespace MagicWords.Application.Managers
 
             Match match = new Match(matchId, player1Id, gameMode, objective, maxTime, boardSetup);
             matchReference.SetRawJsonValueAsync(JsonUtility.ToJson(match));
-            // gameEventsChannel.OnMatchCreated(matchId);  //Lo comentamos temporalmente
+            gameEventsChannel.RaiseMatchCreated(matchId);
             // Llamar a una Cloud Function para buscar oponentes (para el modo PvP)
             // ...
         }
@@ -110,6 +110,7 @@ namespace MagicWords.Application.Managers
 
             // Enviar datos a Firebase
             databaseReference.Child("matches").Child(matchId).Child("moves").Push().SetValueAsync(cellData);
+            gameEventsChannel.RaisePlayerSelectedCell(selectedCell, playerId);
         }
 
         public void SendWordValidated(List<Cell> word, string playerId, int score)
@@ -138,6 +139,7 @@ namespace MagicWords.Application.Managers
 
             // Enviar datos a Firebase
             databaseReference.Child("matches").Child(matchId).Child("validatedWords").Push().SetValueAsync(validatedWordData);
+            gameEventsChannel.RaiseWordValidated(word, playerId, score);
         }
 
         public async Task CheckPlayerConnection()

@@ -22,12 +22,14 @@ namespace MagicWords.Application.Managers
         {
             // Suscribirse a eventos de UI
             uiEventsChannel.OnStartMatch += HandleStartMatch;
+            gameEventsChannel.OnMatchCreated += HandleMatchCreated;
         }
 
         private void OnDestroy()
         {
             // Desuscribirse de eventos
             uiEventsChannel.OnStartMatch -= HandleStartMatch;
+            gameEventsChannel.OnMatchCreated -= HandleMatchCreated;
         }
 
         private async void HandleStartMatch()
@@ -35,10 +37,12 @@ namespace MagicWords.Application.Managers
             //Obtener datos de la partida de la UI
             //Crear la partida en firebase
             firebaseManager.CreateMatch(firebaseManager.UserId, gameMode, objective, maxTime, boardSetup);
+        }
+
+        private void HandleMatchCreated(string matchId)
+        {
             //Obtener el id de la partida creada
-            //...
-            //Crear la partida local
-            //currentMatch = new Match(matchId, firebaseManager.UserId, gameMode, objective, maxTime, boardSetup);
+            currentMatch = new Match(matchId, firebaseManager.UserId, gameMode, objective, maxTime, boardSetup);
         }
 
         public void HandleMatchStarted(string matchId)

@@ -24,12 +24,12 @@ namespace MagicWords.Application.Managers
                 int score = scoreService.CalculateScore(word);
                 match.AddValidatedWord(playerId, word);
                 match.UpdatePlayerScore(playerId, score);
-                // gameEventsChannel.OnWordValidated(word, playerId, score);  //Lo comentamos temporalmente
+                gameEventsChannel.RaiseWordValidated(word, playerId, score);
 
             }
             else
             {
-                // gameEventsChannel.OnWordNotValidated(word, playerId); // Evento para palabra no válida. Lo comentamos temporalmente
+                gameEventsChannel.RaiseWordNotValidated(word, playerId);
             }
             match.ClearPlayerWord(playerId);
         }

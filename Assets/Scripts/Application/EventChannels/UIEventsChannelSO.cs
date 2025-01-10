@@ -6,12 +6,15 @@ namespace MagicWords.Application.EventChannels
     [CreateAssetMenu(menuName = "Events/UI Events Channel")]
     public class UIEventsChannelSO : ScriptableObject
     {
+        public event Action OnStartMatch;
         public event Action OnConnectionLost;
         public event Action OnConnectionRestored;
         public event Action OnConnectionTimeout;
-        public event Action OnStartMatch;
 
-        
+        public void RaiseStartMatch()
+        {
+            OnStartMatch?.Invoke();
+        }
 
         public void RaiseConnectionLost()
         {
@@ -26,11 +29,6 @@ namespace MagicWords.Application.EventChannels
         public void RaiseConnectionTimeout()
         {
             OnConnectionTimeout?.Invoke();
-        }
-
-        public void RaiseStartMatch()
-        {
-            OnStartMatch?.Invoke();
         }
     }
 }
