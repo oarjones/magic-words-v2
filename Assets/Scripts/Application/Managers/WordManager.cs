@@ -4,12 +4,12 @@ using MagicWords.Domain.Logic.Services;
 using MagicWords.Application.EventChannels;
 using UnityEngine;
 using System.Linq;
+using MagicWords.Application.Managers;
 
 namespace MagicWords.Application.Managers
 {
     public class WordManager : MonoBehaviour
     {
-        [SerializeField] private GameEventsChannelSO gameEventsChannel;
         [SerializeField] private DictionaryService dictionaryService;
         [SerializeField] private ScoreService scoreService;
         [SerializeField] private MoveValidator moveValidator;
@@ -24,12 +24,12 @@ namespace MagicWords.Application.Managers
                 int score = scoreService.CalculateScore(word);
                 match.AddValidatedWord(playerId, word);
                 match.UpdatePlayerScore(playerId, score);
-                gameEventsChannel.RaiseWordValidated(word, playerId, score);
+                // gameEventsChannel.OnWordValidated(word, playerId, score);  //Lo comentamos temporalmente
 
             }
             else
             {
-                gameEventsChannel.RaiseWordNotValidated(word, playerId);
+                // gameEventsChannel.OnWordNotValidated(word, playerId); // Evento para palabra no válida. Lo comentamos temporalmente
             }
             match.ClearPlayerWord(playerId);
         }
