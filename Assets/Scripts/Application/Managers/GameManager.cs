@@ -15,7 +15,6 @@ namespace MagicWords.Application.Managers
         [SerializeField] private GameEventsChannelSO gameEventsChannel;
         [SerializeField] private WordManager wordManager;
         [SerializeField] private AlgorithmManager algorithmManager;
-        [SerializeField] private PowerUpManager powerUpManager;
 
         public GameMode gameMode; //PvP or PvA
         public float maxTime;
@@ -30,6 +29,7 @@ namespace MagicWords.Application.Managers
             // Suscribirse a eventos de UI
             uiEventsChannel.OnStartMatch += HandleStartMatch;
             gameEventsChannel.OnMatchCreated += HandleMatchCreated;
+            gameEventsChannel.OnMatchStarted += HandleMatchStarted;
         }
 
         private void OnDestroy()
@@ -37,6 +37,7 @@ namespace MagicWords.Application.Managers
             // Desuscribirse de eventos
             uiEventsChannel.OnStartMatch -= HandleStartMatch;
             gameEventsChannel.OnMatchCreated -= HandleMatchCreated;
+            gameEventsChannel.OnMatchStarted -= HandleMatchStarted;
         }
 
         private async void HandleStartMatch()
@@ -65,17 +66,11 @@ namespace MagicWords.Application.Managers
             gameService.CreateBoard(boardSetup);
         }
 
-        public void HandleMatchStarted(string matchId)
+        public void HandleMatchStarted(Match match)
         {
-            //Obtener la configuración del tablero de Firebase si es necesario
-            if (gameMode == GameMode.PvP)
-            {
-                //...
-            }
+            currentMatch = match;
             //Crear el tablero
-            //...
-            //Iniciar la partida
-            //...
+            CreateBoard();
         }
 
         public void HandleCellSelection(Cell cell, string playerId)
@@ -113,5 +108,35 @@ namespace MagicWords.Application.Managers
                 gameService.EndGame();
             }
         }
+
+        private void CreateBoard()
+        {
+            // Lógica para crear el tablero de juego
+            // Crear un tablero de ejemplo (puedes modificar esto para generar tableros aleatorios o personalizados)
+            Dictionary<int, Dictionary<int, Cell>> cells = new Dictionary<int, Dictionary<int, Cell>>();
+
+            // Ejemplo de creación de un tablero hexagonal
+            for (int i = -2; i <= 2; i++)
+            {
+                cells[i] = new Dictionary<int, Cell>();
+                for (int j = -2; j <= 2; j++)
+                {
+                    if (i == -2 && j == 2) continue;
+                    if (i == -1 && j == 2) continue;
+                    if (i == 2 && j == -2) continue;
+                    if (i == 1 && j == -2) continue;
+                    //Asignar una letra aleatoria a cada celda
+                    char randomLetter = (char)('A' + Random.Range(0, 26));
+                    cells[i][j] = new Cell(randomLetter, i, j);
+                }
+            }
+
+            Board board = new Board(cells);
+            currentMatch.SetBoard(board);
+
+            // Notificar a UIManager que el tablero está listo
+            FindFirstObjectByType<UIManager>().CreateBoard(board); // Asegúrate de que UIManager exista en la escena
+        }
+
     }
 }

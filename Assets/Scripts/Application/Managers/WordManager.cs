@@ -14,7 +14,7 @@ namespace MagicWords.Application.Managers
         [SerializeField] private ScoreService scoreService;
         [SerializeField] private MoveValidator moveValidator;
 
-        public void ValidateWord(List<Cell> word, string playerId, Match match)
+        public bool ValidateWord(List<Cell> word, string playerId, Match match)
         {
             string wordString = ConvertCellsToString(word);
             bool isValid = dictionaryService.IsValidWord(wordString);
@@ -32,6 +32,8 @@ namespace MagicWords.Application.Managers
                 // gameEventsChannel.OnWordNotValidated(word, playerId); // Evento para palabra no válida. Lo comentamos temporalmente
             }
             match.ClearPlayerWord(playerId);
+
+            return isValid;
         }
 
         public bool IsValidMove(Cell currentCell, Cell nextCell)

@@ -15,14 +15,15 @@ namespace MagicWords.Application.Services
         private AlgorithmManager algorithmManager;
         private Match currentMatch;
 
+        
         public LocalGameService(GameManager gameManager, GameEventsChannelSO gameEventsChannel, WordManager wordManager, AlgorithmManager algorithmManager)
         {
             this.gameManager = gameManager;
             this.gameEventsChannel = gameEventsChannel;
             this.wordManager = wordManager;
             this.algorithmManager = algorithmManager;
+            
         }
-
 
 
 
@@ -32,6 +33,7 @@ namespace MagicWords.Application.Services
             string matchId = Guid.NewGuid().ToString(); // Generar un ID único para la partida
             currentMatch = new Match(matchId, player1Id, gameMode, objective, maxTime, boardSetup);
             gameEventsChannel.RaiseMatchCreated(matchId);
+            gameEventsChannel.RaiseMatchStarted(currentMatch);
         }
 
         public void HandleCellSelection(Cell cell, string playerId)
@@ -48,16 +50,17 @@ namespace MagicWords.Application.Services
                     currentMatch.ClearPlayerWord(playerId);
                 }
             }
-            if (playerId == currentMatch.Player2Id)
+            if (playerId == currentMatch.Player2Id && currentMatch.Mode == GameMode.PvA)
             {
                 // Si el jugador es la IA, generar un movimiento después de que haya seleccionado una celda
                 algorithmManager.GenerateMove(currentMatch, currentMatch.Board);
             }
         }
+
         public void CreateBoard(string boardSetup)
         {
             // Crear el tablero localmente
-            gameManager.HandleMatchStarted(currentMatch.MatchId);
+            //Ya se crea el tableto en GameManager
             if (currentMatch.Mode == GameMode.PvA)
             {
                 currentMatch.SetPlayer2("AIGamePlayer");

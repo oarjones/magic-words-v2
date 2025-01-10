@@ -75,7 +75,7 @@ namespace MagicWords.Application.Managers
             });
         }
 
-        public void CreateMatch(string player1Id, GameMode gameMode, string objective, float maxTime, string boardSetup)
+        public Match CreateMatch(string player1Id, GameMode gameMode, string objective, float maxTime, string boardSetup)
         {
             matchId = databaseReference.Child("matches").Push().Key;
             matchReference = databaseReference.Child("matches").Child(matchId);
@@ -85,6 +85,8 @@ namespace MagicWords.Application.Managers
             gameEventsChannel.RaiseMatchCreated(matchId);
             // Llamar a una Cloud Function para buscar oponentes (para el modo PvP)
             // ...
+
+            return match;
         }
         public void StartMatch()
         {

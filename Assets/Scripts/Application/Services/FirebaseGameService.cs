@@ -11,6 +11,7 @@ namespace MagicWords.Application.Services
     {
         private FirebaseManager firebaseManager;
         private GameEventsChannelSO gameEventsChannel;
+        private Match currentMatch;
 
         public FirebaseGameService(FirebaseManager firebaseManager, GameEventsChannelSO gameEventsChannel)
         {
@@ -21,7 +22,10 @@ namespace MagicWords.Application.Services
         public void StartGame(string player1Id, GameMode gameMode, string objective, float maxTime, string boardSetup)
         {
             // Crea la partida en Firebase
-            firebaseManager.CreateMatch(player1Id, gameMode, objective, maxTime, boardSetup);
+            currentMatch = firebaseManager.CreateMatch(player1Id, gameMode, objective, maxTime, boardSetup);
+            
+            gameEventsChannel.RaiseMatchCreated(currentMatch.MatchId);
+            gameEventsChannel.RaiseMatchStarted(currentMatch);
         }
 
         public void CreateBoard(string boardSetup)
