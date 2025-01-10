@@ -10,11 +10,12 @@ namespace MagicWords.Application.Managers
 {
     public class WordManager : MonoBehaviour
     {
+        [SerializeField] private GameEventsChannelSO gameEventsChannel; // Añade esta línea
         [SerializeField] private DictionaryService dictionaryService;
         [SerializeField] private ScoreService scoreService;
         [SerializeField] private MoveValidator moveValidator;
 
-        public bool ValidateWord(List<Cell> word, string playerId, Match match)
+        public void ValidateWord(List<Cell> word, string playerId, Match match)
         {
             string wordString = ConvertCellsToString(word);
             bool isValid = dictionaryService.IsValidWord(wordString);
@@ -24,16 +25,14 @@ namespace MagicWords.Application.Managers
                 int score = scoreService.CalculateScore(word);
                 match.AddValidatedWord(playerId, word);
                 match.UpdatePlayerScore(playerId, score);
-                // gameEventsChannel.OnWordValidated(word, playerId, score);  //Lo comentamos temporalmente
+                gameEventsChannel.RaiseWordValidated(word, playerId, score);  //Lo comentamos temporalmente
 
             }
             else
             {
-                // gameEventsChannel.OnWordNotValidated(word, playerId); // Evento para palabra no válida. Lo comentamos temporalmente
+                gameEventsChannel.RaiseWordNotValidated(word, playerId); // Evento para palabra no válida. Lo comentamos temporalmente
             }
             match.ClearPlayerWord(playerId);
-
-            return isValid;
         }
 
         public bool IsValidMove(Cell currentCell, Cell nextCell)
