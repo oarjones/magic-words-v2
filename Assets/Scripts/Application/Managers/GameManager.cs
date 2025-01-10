@@ -15,6 +15,7 @@ namespace MagicWords.Application.Managers
         [SerializeField] private GameEventsChannelSO gameEventsChannel;
         [SerializeField] private WordManager wordManager;
         [SerializeField] private AlgorithmManager algorithmManager;
+        [SerializeField] private PowerUpManager powerUpManager;
 
         public GameMode gameMode; //PvP or PvA
         public float maxTime;
