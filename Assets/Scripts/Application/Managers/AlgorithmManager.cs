@@ -43,7 +43,7 @@ namespace MagicWords.Application.Managers
             // 4. Si se encuentra una palabra, enviarla
             if (bestWord.Count > 0)
             {
-                List<Cell> wordCells = bestWord.Select(cellLetter => availableCells.FirstOrDefault(c => c.Letter.ToString() == cellLetter)).ToList();
+                List<Cell> wordCells = ConvertWordToCells(bestWord, board);
                 wordManager.ValidateWord(wordCells, match.Player2Id, match);
                 match.ClearPlayerWord(match.Player2Id);
                 Debug.Log("Palabra encontrada por la IA: " + ConvertCellsToString(wordCells));
@@ -115,6 +115,37 @@ namespace MagicWords.Application.Managers
         private string ConvertCellsToString(List<Cell> cells)
         {
             return new string(cells.Select(c => c.Letter).ToArray());
+        }
+
+        private List<Cell> ConvertWordToCells(List<string> word, Board board)
+        {
+            List<Cell> wordCells = new List<Cell>();
+            foreach (string letter in word)
+            {
+                // Buscar una celda en el tablero que coincida con la letra actual
+                Cell cell = FindCellByLetter(letter, board);
+                if (cell != null)
+                {
+                    wordCells.Add(cell);
+                }
+            }
+            return wordCells;
+        }
+
+        private Cell FindCellByLetter(string letter, Board board)
+        {
+            //Buscar una celda en el tablero que coincida con la letra dada
+            foreach (var row in board.Cells)
+            {
+                foreach (var cell in row.Value)
+                {
+                    if (cell.Value.Letter.ToString() == letter)
+                    {
+                        return cell.Value;
+                    }
+                }
+            }
+            return null;
         }
     }
 }

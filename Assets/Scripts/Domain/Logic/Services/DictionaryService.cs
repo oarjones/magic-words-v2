@@ -8,8 +8,7 @@ namespace MagicWords.Domain.Logic.Services
 {
     public class DictionaryService
     {
-        private HashSet<string> words;
-        private HashSet<string> prefixes;
+        private Trie trie;
 
         public DictionaryService(TextAsset dictionaryAsset)
         {
@@ -18,27 +17,22 @@ namespace MagicWords.Domain.Logic.Services
 
         private void LoadDictionary(TextAsset dictionaryAsset)
         {
-            words = new HashSet<string>(dictionaryAsset.text.Split('\n').Select(word => word.Trim().ToUpper()));
-            prefixes = new HashSet<string>();
-
-            // Generar todos los prefijos posibles
+            trie = new Trie();
+            string[] words = dictionaryAsset.text.Split('\n');
             foreach (string word in words)
             {
-                for (int i = 1; i <= word.Length; i++)
-                {
-                    prefixes.Add(word.Substring(0, i));
-                }
+                trie.Insert(word.Trim());
             }
         }
 
         public bool IsValidWord(string word)
         {
-            return words.Contains(word.ToUpper());
+            return trie.Search(word);
         }
 
         public bool IsValidPrefix(string prefix)
         {
-            return prefixes.Contains(prefix.ToUpper());
+            return trie.StartsWith(prefix);
         }
     }
 }
