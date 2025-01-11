@@ -4,6 +4,8 @@ using MagicWords.Application.Managers;
 using MagicWords.Domain.Data.Models;
 using MagicWords.Application.Interfaces;
 using System;
+using MagicWords.Domain.Logic.Services;
+using System.Linq;
 
 namespace MagicWords.Application.Services
 {
@@ -40,6 +42,14 @@ namespace MagicWords.Application.Services
         {
             //Gestionar la celda seleccionada localmente (añadir a la palabra actual del jugador)
             currentMatch.AddPlayerWord(playerId, cell);
+
+            // Comprobar si la palabra actual tiene al menos una letra
+            if (currentMatch.PlayerWords[playerId].Count >= 1)
+            {
+                // Cargar el diccionario por prefijo si la primera letra de la palabra actual ha cambiado
+                string currentWordString = string.Join("", currentMatch.PlayerWords[playerId].Select(c => c.Letter));
+                algorithmManager.dictionaryService.LoadDictionaryByPrefix(currentWordString[0]);
+            }
 
             //Comprobar si el movimiento es válido
             if (currentMatch.PlayerWords[playerId].Count > 1)

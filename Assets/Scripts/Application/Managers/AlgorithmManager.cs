@@ -12,7 +12,7 @@ namespace MagicWords.Application.Managers
     public class AlgorithmManager : MonoBehaviour
     {
         [SerializeField] private WordManager wordManager;
-        [SerializeField] private DictionaryService dictionaryService;
+        [SerializeField] public DictionaryService dictionaryService;
 
         private List<string> currentWord = new List<string>();
         private List<string> bestWord = new List<string>();
@@ -20,6 +20,8 @@ namespace MagicWords.Application.Managers
 
         public void GenerateMove(Match match, Board board)
         {
+            // Cargar el diccionario para la búsqueda de palabras por rango de letras si es necesario
+            dictionaryService.LoadDictionaryByLengthRange(3, 6); // o el rango que necesites
             //Reiniciar las variables para la búsqueda de palabras
             currentWord.Clear();
             bestWord.Clear();
